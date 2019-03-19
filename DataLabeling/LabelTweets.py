@@ -16,8 +16,8 @@ import emoji
 
 class DataClass():
     def __init__(self):
-        self.dataFileName = 'SampleData.json'
-        self.labelFileName = 'LabeledData.json'
+        self.dataFileName = 'shuffled_filtered2.json'
+        self.labelFileName = 'LabeledData2.json'
         self.saveJson = False
         self.nextLine = True
         self.quit = False
@@ -36,16 +36,18 @@ class FetchTweet(threading.Thread):
         threading.Thread.__init__(self)
         self.d = data
         self._period = 0.25
-        self._nextCall = time.time()
         self.labeledTweets = []
+        self.labeledCount = 0
         try:
             with open(self.d.labelFileName, encoding="utf8") as f:
                 for line in f:
                     if line != '':
                         tweet = json.loads(line)
                         self.labeledTweets.append(tweet['id'])
+                self.labeledCount = len(self.labeledTweets)
         except FileNotFoundError:
             print("No labeled data, will create new file")
+        print("Labeller started, " + str(self.labeledCount) + " labelled so far")
     
     def run(self):
         with open(self.d.dataFileName, 'r', encoding="utf8") as f:
@@ -59,7 +61,9 @@ class FetchTweet(threading.Thread):
                     with open(self.d.labelFileName, 'a+', \
                               encoding="utf8") as outputFile:
                         outputFile.write(json.dumps(tweet) + '\n')
-                        print("Tweet Labeled: " + str(tweet['id']))
+                        self.labeledCount += 1
+                        print("Tweet Labeled: " + str(tweet['id']) + " #" + 
+                              str(self.labeledCount))
                 if self.d.nextLine:
                     self.d.nextLine = False
                     while True:
@@ -74,8 +78,7 @@ class FetchTweet(threading.Thread):
                     print("Labeller stopped")
                     break
                 # sleep until next execution
-                self._nextCall = self._nextCall + self._period;
-                time.sleep(self._nextCall - time.time())
+                time.sleep(self._period)
       
 #Show tweet on a figure
 class PlotTweet(): 
@@ -108,6 +111,7 @@ class PlotTweet():
                 plt.text(leftX, 0.35, self.d.relLabels[self.d.relevant])
             if self.d.sentReady:
                 plt.text(leftX, 0.25, self.d.sentLabels[self.d.sentiment])
+            
                 
     def on_key(self, event):
         if event.key == 'escape':
