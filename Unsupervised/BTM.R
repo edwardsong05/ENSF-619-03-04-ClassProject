@@ -34,6 +34,10 @@ PA_df<- PA_df %>%
   filter(!str_detect(word, "they")) %>%
   filter(!str_detect(word, "very")) %>%
   filter(!str_detect(word, "lan")) %>%
+  filter(!str_detect(word, "emoji_face_with_tears_of_joy")) %>%
+  filter(!str_detect(word, "emoji_rolling_on_the_floor_laughing")) %>%
+  filter(!str_detect(word, "emoji.*")) %>%
+  filter(!str_detect(word, "bitcoin")) %>%
   mutate(word = wordStem(word)) %>%
   anti_join(stop_words)  
 
@@ -47,5 +51,5 @@ model  <- BTM(PA_df, k = 3, beta = 0.01, iter = 1000, trace = 100, background = 
 ## Inspect the model - topic frequency + conditional term probabilities
 model$theta
 
-topicterms <- terms(model, top_n = 10)
+topicterms <- terms(model, top_n = 5)
 topicterms
